@@ -7,7 +7,7 @@
 - ``@EntityListeners(AuditingEntityListener.class)`` (Entity 클래스)
 - 
     ```java
-    @CreatedDate //INSERT 시 자동생성
+    @CreatedDate //INSER에T 시 자동생성
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
