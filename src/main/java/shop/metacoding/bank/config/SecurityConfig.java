@@ -10,14 +10,19 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import shop.metacoding.bank.domain.user.UserEnum;
+import shop.metacoding.bank.dto.ResponseDto;
+import shop.metacoding.bank.util.CustomResponseUtil;
 
 @Slf4j
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder() {
         log.debug("BCryptPasswordEncoder Bean 등록");
         return new BCryptPasswordEncoder();
     }
@@ -25,11 +30,10 @@ public class SecurityConfig {
     // TODO : JWT 필터 등록이 필요함
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
-        log.debug("FilterChain 빈 등록");
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.headers().frameOptions().disable(); //HTTP <iframe> 허용안함
         http.csrf().disable(); // enable 이면 postman 작동안함
-        http.cors().configurationSource(configurationSource()); // todo : CORS 는  JS 요청 거부(일단은 null 설정, 추후에 변경)
+        http.cors().configurationSource(configurationSource()); // todo : CORS 는  JS 요청 거부
 
         // jSessionId 를 서버쪽에서 관리안한다는 뜻
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -38,16 +42,20 @@ public class SecurityConfig {
         // httpBasic 은 브라우저가 팝업창을 이용해서 사용자 인증을 진행하는 것을 막는다.
         http.httpBasic().disable();
 
+        // Exception 가로채기
+        http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
+            CustomResponseUtil.unAuthentication(response, "로그인을 진행해 주세요 !!");
+        });
+
         http.authorizeRequests()
                 .antMatchers("/api/s/**").authenticated() // 인증필요
-                .antMatchers("/api/admin/**").hasRole(""+UserEnum.ADMIN) // ROLE_ 안붙혀도됨
+                .antMatchers("/api/admin/**").hasRole("" + UserEnum.ADMIN) // ROLE_ 안붙혀도됨
                 .anyRequest().permitAll(); // 나머지 요청은 허용
 
         return http.build();
     }
 
-    public CorsConfigurationSource configurationSource(){
-        log.debug("configurationSource cors 설정이 SecurityFilterChain 등록됨 ");
+    public CorsConfigurationSource configurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedHeader("*"); // 모든 헤더허용
         configuration.addAllowedMethod("*"); // GET, POST, PUT, DELETE (Javascript 요청 허용)
