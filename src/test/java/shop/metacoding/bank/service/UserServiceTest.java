@@ -11,10 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import shop.metacoding.bank.config.dummy.DummyObject;
 import shop.metacoding.bank.domain.user.User;
-import shop.metacoding.bank.domain.user.UserEnum;
 import shop.metacoding.bank.domain.user.UserRepository;
-
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
