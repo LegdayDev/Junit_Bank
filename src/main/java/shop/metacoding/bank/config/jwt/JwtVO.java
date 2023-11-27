@@ -7,6 +7,6 @@ package shop.metacoding.bank.config.jwt;
 public interface JwtVO {
     public static final String SECRET = "메타코딩"; // HS256 알고리즘을 위한 서버만 알고있는 키 값
     public static final int EXPIRATION_TIME = 1000 * 60 * 60 * 24 * 7; // 만료시간(ms)
-    public static final String TOKEN_PREFIX = "Bearer "; // Protocal 이다
+    public static final String TOKEN_PREFIX = "Bearer "; // Protocol 이다
     public static final String HEADER = "Authorization";
 }
