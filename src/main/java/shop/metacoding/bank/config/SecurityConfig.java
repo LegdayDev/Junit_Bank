@@ -3,7 +3,9 @@ package shop.metacoding.bank.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -13,6 +15,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import shop.metacoding.bank.config.jwt.JwtAuthenticationFilter;
 import shop.metacoding.bank.domain.user.UserEnum;
 import shop.metacoding.bank.dto.ResponseDto;
 import shop.metacoding.bank.util.CustomResponseUtil;
@@ -27,7 +30,16 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // TODO : JWT 필터 등록이 필요함
+    // 공식 문서에 따라 모든 Filter 는 이 메서드에서 등록해야 한다.
+    public class CustomSecurityFilterManager extends AbstractHttpConfigurer<CustomSecurityFilterManager,HttpSecurity>{
+        @Override
+        public void configure(HttpSecurity builder) throws Exception {
+            // 강제로 AuthenticationManager 를 만든다.
+            AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
+            builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+            super.configure(builder);
+        }
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -41,6 +53,8 @@ public class SecurityConfig {
         http.formLogin().disable();
         // httpBasic 은 브라우저가 팝업창을 이용해서 사용자 인증을 진행하는 것을 막는다.
         http.httpBasic().disable();
+        // Filter 적용
+        http.apply(new CustomSecurityFilterManager());
 
         // Exception 가로채기
         http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {

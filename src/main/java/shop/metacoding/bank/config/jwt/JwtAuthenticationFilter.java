@@ -1,6 +1,7 @@
 package shop.metacoding.bank.config.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import static shop.metacoding.bank.dto.user.UserReqDto.*;
 import static shop.metacoding.bank.dto.user.UserRespDto.*;
 
+@Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private AuthenticationManager authenticationManager;
@@ -35,6 +37,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // POST : /login 요청 시 동작
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        log.debug("디버그 : attemptAuthentication() 호출됨");
         try {
             ObjectMapper om = new ObjectMapper();
             LoginReqDto loginReqDto = om.readValue(request.getInputStream(), LoginReqDto.class);
@@ -58,6 +61,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // attemptAuthentication() 가 잘 작동하면 호출
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        log.debug("디버그 : successfulAuthentication() 호출됨");
         LoginUser loginUser = (LoginUser) authResult.getPrincipal();
         String jwtToken = JwtProcess.create(loginUser);
 
