@@ -16,6 +16,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import shop.metacoding.bank.config.jwt.JwtAuthenticationFilter;
+import shop.metacoding.bank.config.jwt.JwtAuthorizationFilter;
 import shop.metacoding.bank.domain.user.UserEnum;
 import shop.metacoding.bank.dto.ResponseDto;
 import shop.metacoding.bank.util.CustomResponseUtil;
@@ -37,6 +38,7 @@ public class SecurityConfig {
             // 강제로 AuthenticationManager 를 만든다.
             AuthenticationManager authenticationManager = builder.getSharedObject(AuthenticationManager.class);
             builder.addFilter(new JwtAuthenticationFilter(authenticationManager));
+            builder.addFilter(new JwtAuthorizationFilter(authenticationManager));
             super.configure(builder);
         }
     }
