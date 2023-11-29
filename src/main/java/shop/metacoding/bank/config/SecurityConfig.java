@@ -3,6 +3,7 @@ package shop.metacoding.bank.config;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -58,9 +59,14 @@ public class SecurityConfig {
         // Filter 적용
         http.apply(new CustomSecurityFilterManager());
 
-        // Exception 가로채기
+        // Exception 가로채기(인증실패)
         http.exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
-            CustomResponseUtil.unAuthentication(response, "로그인을 진행해 주세요 !!");
+            CustomResponseUtil.fail(response, "로그인을 진행해 주세요 !!", HttpStatus.UNAUTHORIZED);
+        });
+
+        // Exception 가로채기(권한 실패)
+        http.exceptionHandling().accessDeniedHandler((request,response,e)->{
+            CustomResponseUtil.fail(response, "관리자 권한이 없습니다.", HttpStatus.FORBIDDEN);
         });
 
         http.authorizeRequests()
