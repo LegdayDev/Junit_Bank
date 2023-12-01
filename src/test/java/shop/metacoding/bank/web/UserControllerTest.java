@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.result.StatusResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 import shop.metacoding.bank.config.dummy.DummyObject;
 import shop.metacoding.bank.domain.user.UserRepository;
 import shop.metacoding.bank.dto.user.UserReqDto;
@@ -22,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static shop.metacoding.bank.dto.user.UserReqDto.*;
 
+@Transactional
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 public class UserControllerTest extends DummyObject {
@@ -35,7 +37,7 @@ public class UserControllerTest extends DummyObject {
 
     @BeforeEach
     public void setUp(){
-        dataSetting();
+        userRepository.save(newUser("ssar","쌀"));
     }
 
 
@@ -85,8 +87,4 @@ public class UserControllerTest extends DummyObject {
         resultActions.andExpect(status().isBadRequest());
     }
 
-
-    private void dataSetting() {
-        userRepository.save(newUser("ssar","쌀"));
-    }
 }
