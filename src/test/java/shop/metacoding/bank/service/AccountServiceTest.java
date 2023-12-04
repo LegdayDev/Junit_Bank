@@ -14,6 +14,8 @@ import shop.metacoding.bank.domain.account.AccountRepository;
 import shop.metacoding.bank.domain.user.User;
 import shop.metacoding.bank.domain.user.UserRepository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -61,5 +63,30 @@ class AccountServiceTest extends DummyObject {
 
         //then
         assertThat(accountSaveRespDto.getNumber()).isEqualTo(4016L);
+    }
+
+    // TODO - Junit 중급강의 종료후 코드 비교해보기
+    @Test
+    public void 계좌목록보기_유저별_test() throws Exception {
+        //given
+        Long userId = 1L;
+
+        //stub 1
+        User cristiano = newMockUser(userId, "cristiano", "ronaldo");
+        Mockito.when(userRepository.findById(userId)).thenReturn(Optional.of(cristiano));
+
+        //stub 2
+        Account cristianoAccount1 = newMockAccount(userId, 4016L, 1000L, cristiano);
+        Account cristianoAccount2 = newMockAccount(userId, 3427L, 1000L, cristiano);
+        List<Account> accounts = new ArrayList<>();
+        accounts.add(cristianoAccount1);
+        accounts.add(cristianoAccount2);
+        Mockito.when(accountRepository.findByUser_id(userId)).thenReturn(accounts);
+
+        //when
+        AccountListRespDto accountListRespDto = accountService.계좌목록보기_유저별(userId);
+
+        //then
+        assertThat(accountListRespDto.getAccounts().size()).isEqualTo(2);
     }
 }
