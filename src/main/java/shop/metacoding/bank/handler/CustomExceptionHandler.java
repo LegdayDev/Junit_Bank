@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import shop.metacoding.bank.dto.ResponseDto;
 import shop.metacoding.bank.handler.ex.CustomApiException;
+import shop.metacoding.bank.handler.ex.CustomForbiddenException;
 import shop.metacoding.bank.handler.ex.CustomValidationException;
 
 @RestControllerAdvice
@@ -18,6 +19,13 @@ public class CustomExceptionHandler {
         log.error(e.getMessage());
 
         return new ResponseEntity<>(new ResponseDto<>(-1,e.getMessage(),null), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(CustomForbiddenException.class)
+    public ResponseEntity<?> forbiddenException(CustomApiException e){
+        log.error(e.getMessage());
+
+        return new ResponseEntity<>(new ResponseDto<>(-1,e.getMessage(),null), HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(CustomValidationException.class)
