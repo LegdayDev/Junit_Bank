@@ -13,6 +13,7 @@ import shop.metacoding.bank.domain.account.Account;
 import shop.metacoding.bank.domain.account.AccountRepository;
 import shop.metacoding.bank.domain.user.User;
 import shop.metacoding.bank.domain.user.UserRepository;
+import shop.metacoding.bank.handler.ex.CustomApiException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,5 +89,20 @@ class AccountServiceTest extends DummyObject {
 
         //then
         assertThat(accountListRespDto.getAccounts().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void 계좌삭제_test() throws Exception {
+        //given
+        Long number = 1111L;
+        Long userId = 2L;
+
+        //stub
+        User cristiano = newMockUser(1L, "cristiano", "ronaldo");
+        Account cristianoAccount = newMockAccount(1L, 1111L, 1000L, cristiano);
+        Mockito.when(accountRepository.findByNumber(Mockito.any())).thenReturn(Optional.of(cristianoAccount));
+
+        //when
+        assertThrows(CustomApiException.class, () -> accountService.계좌삭제(number, userId));
     }
 }
