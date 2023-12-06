@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
@@ -17,8 +16,13 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import shop.metacoding.bank.config.dummy.DummyObject;
+import shop.metacoding.bank.domain.account.AccountRepository;
+import shop.metacoding.bank.domain.user.User;
 import shop.metacoding.bank.domain.user.UserRepository;
+import shop.metacoding.bank.handler.ex.CustomApiException;
 
+
+import javax.persistence.EntityManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static shop.metacoding.bank.dto.account.AccountRespDto.*;
@@ -36,11 +40,21 @@ class AccountControllerTest extends DummyObject {
     private UserRepository userRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private EntityManager em;
+
+    @Autowired
     private ObjectMapper om;
 
     @BeforeEach
-    public void setUp(){
-        userRepository.save(newUser("cristiano","ronaldo"));
+    public void setUp() {
+        User cristiano = userRepository.save(newUser("cristiano", "ronaldo"));
+        User messi = userRepository.save(newUser("messi", "lionel"));
+        accountRepository.save(newAccount(1111L, cristiano));
+        accountRepository.save(newAccount(2222L, messi));
+        em.clear();
     }
 
     @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
@@ -77,6 +91,29 @@ class AccountControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    /**
+     * <h2>Test 시 영속화컨텍스트를 초기화 해야 하는 이유!!</h2>
+     * <li>테스트시에는 insert 한 것들이 영속화컨텍스트에 남아 있다.</li>
+     * <li>개발 모드와 동일한 환경에으로 테스트 할려면 영속화 컨텍스트를 비워야 한다.</li>
+     *
+     * @throws Exception
+     */
+    @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void deleteAccount_test() throws Exception {
+        //given
+        Long number = 1111L;
+
+        //when
+        ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.delete("/api/s/account/" + number));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        //then
+        assertThrows(CustomApiException.class, () -> accountRepository.findByNumber(number).orElseThrow(
+                                                        () -> new CustomApiException("계좌를 찾을 수 없습니다.")));
 
     }
 }
