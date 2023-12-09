@@ -45,4 +45,13 @@ public class AccountController {
         accountService.계좌삭제(number,loginUser.getUser().getId());
         return new ResponseEntity<>(new ResponseDto<>(1,"계좌삭제 성공",null),HttpStatus.OK);
     }
+
+    @PostMapping("/account/deposit") // 입금이기 때문에 인증이 필요없다.
+    public ResponseEntity<?> depositAccount(@RequestBody @Valid AccountDepositReqDto accountDepositReqDto,
+                                            BindingResult bindingResult){
+        AccountDepositRespDto accountDepositRespDto = accountService.계좌입금(accountDepositReqDto);
+
+        return new ResponseEntity<>(new ResponseDto<>(1,"계좌 입금 완료",accountDepositRespDto),HttpStatus.CREATED);
+
+    }
 }
