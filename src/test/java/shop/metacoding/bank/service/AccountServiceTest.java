@@ -11,6 +11,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import shop.metacoding.bank.config.dummy.DummyObject;
 import shop.metacoding.bank.domain.account.Account;
 import shop.metacoding.bank.domain.account.AccountRepository;
+import shop.metacoding.bank.domain.transaction.Transaction;
+import shop.metacoding.bank.domain.transaction.TransactionEnum;
+import shop.metacoding.bank.domain.transaction.TransactionRepository;
 import shop.metacoding.bank.domain.user.User;
 import shop.metacoding.bank.domain.user.UserRepository;
 import shop.metacoding.bank.handler.ex.CustomApiException;
@@ -34,6 +37,8 @@ class AccountServiceTest extends DummyObject {
     private UserRepository userRepository;
     @Mock
     private AccountRepository accountRepository;
+    @Mock
+    private TransactionRepository transactionRepository;
 
     @Spy // 진짜 객체를 InjectMock 에 주입
     private ObjectMapper om;
@@ -104,5 +109,35 @@ class AccountServiceTest extends DummyObject {
 
         //when
         assertThrows(CustomApiException.class, () -> accountService.계좌삭제(number, userId));
+    }
+
+    @Test
+    public void 계좌입금_test() throws Exception {
+        //given
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto();
+        accountDepositReqDto.setNumber(1111L);
+        accountDepositReqDto.setAmount(100L);
+        accountDepositReqDto.setGubun("DEPOSIT");
+        accountDepositReqDto.setTel("01040163427");
+
+        // stub 1
+        User cristiano = newMockUser(1L, "cristiano", "ronaldo");
+        Account account = newMockAccount(1L, 1111L, 1000L, cristiano);
+        Mockito.when(accountRepository.findByNumber(Mockito.any())).thenReturn(Optional.of(account));
+
+        // stub 2
+        Account account2 = newMockAccount(1L, 1111L, 1000L, cristiano);
+        Transaction transaction = newMockDepositTransaction(1L, account2);
+        Mockito.when(transactionRepository.save(Mockito.any())).thenReturn(transaction);
+
+
+        //when
+        AccountDepositRespDto accountDepositRespDto = accountService.계좌입금(accountDepositReqDto);
+        String responseBody = om.writeValueAsString(accountDepositRespDto);
+        System.out.println("responseBody = " + responseBody);
+
+        //then
+        assertThat(accountDepositRespDto.getTransaction().getDepositAccountBalance()).isEqualTo(1100L);
+        assertThat(account.getBalance()).isEqualTo(1100L);
     }
 }
