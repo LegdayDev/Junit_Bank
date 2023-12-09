@@ -19,12 +19,14 @@ import shop.metacoding.bank.config.dummy.DummyObject;
 import shop.metacoding.bank.domain.account.AccountRepository;
 import shop.metacoding.bank.domain.user.User;
 import shop.metacoding.bank.domain.user.UserRepository;
+import shop.metacoding.bank.dto.account.AccountReqDto;
 import shop.metacoding.bank.handler.ex.CustomApiException;
 
 
 import javax.persistence.EntityManager;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static shop.metacoding.bank.dto.account.AccountReqDto.*;
 import static shop.metacoding.bank.dto.account.AccountRespDto.*;
 
 //@Transactional
@@ -115,6 +117,28 @@ class AccountControllerTest extends DummyObject {
         //then
         assertThrows(CustomApiException.class, () -> accountRepository.findByNumber(number).orElseThrow(
                                                         () -> new CustomApiException("계좌를 찾을 수 없습니다.")));
+    }
 
+    @Test
+    public void depositAccount_test() throws Exception {
+        //given
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto();
+        accountDepositReqDto.setNumber(1111L);
+        accountDepositReqDto.setAmount(100L);
+        accountDepositReqDto.setGubun("DEPOSIT");
+        accountDepositReqDto.setTel("01040163427");
+
+        String requestBody = om.writeValueAsString(accountDepositReqDto);
+        System.out.println("requestBody = " + requestBody);
+
+        //when
+        ResultActions resultActions = mvc.perform
+                (MockMvcRequestBuilders.post("/api/account/deposit").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
     }
 }
