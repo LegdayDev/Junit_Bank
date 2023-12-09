@@ -55,9 +55,13 @@ public class Account {
         this.updatedAt = updatedAt;
     }
 
-    public void checkOwner(Long userId){
-        if(!this.user.getId().equals(userId)){
+    public void checkOwner(Long userId) {
+        if (!this.user.getId().equals(userId)) {
             throw new CustomApiException("계좌 소유자가 아닙니다.");
         }
+    }
+
+    public void deposit(Long amount) {
+        balance += amount;
     }
 }

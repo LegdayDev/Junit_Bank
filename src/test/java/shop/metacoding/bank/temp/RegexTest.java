@@ -88,4 +88,36 @@ public class RegexTest {
         assertThat(result).isTrue();
     }
 
+    @Test
+    @DisplayName("계좌입금 시 구분 테스트")
+    public void account_gubun_test() throws Exception {
+        String gubun = "DEPOSIT";
+        boolean result = Pattern.matches("^(DEPOSIT)$", gubun);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("계좌입금 및 송금 시 구분 테스트")
+    public void account_gubun_test2() throws Exception {
+        String gubun = "TRANSFER";
+        boolean result = Pattern.matches("^(DEPOSIT|TRANSFER)$", gubun);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("계좌입금 시 전화번호 테스트(하이푼")
+    public void account_tel_test() throws Exception {
+        String tel = "01040163427";
+        boolean result = Pattern.matches("^[0-9]{3}[0-9]{4}[0-9]{4}", tel);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("계좌입금 시 전화번호 테스트(하이푼)")
+    public void account_tel_test2() throws Exception {
+        String tel = "010-4016-3427";
+        boolean result = Pattern.matches("^[0-9]{3}-[0-9]{4}-[0-9]{4}", tel);
+        assertThat(result).isTrue();
+    }
+
 }
