@@ -1,6 +1,7 @@
 package shop.metacoding.bank.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -139,5 +140,21 @@ class AccountServiceTest extends DummyObject {
         //then
         assertThat(accountDepositRespDto.getTransaction().getDepositAccountBalance()).isEqualTo(1100L);
         assertThat(account.getBalance()).isEqualTo(1100L);
+    }
+
+    @Test
+    @DisplayName("계좌입금() : 0원 이하 금액 들어오는 테스트")
+    public void 계좌입금_test2() throws Exception {
+        //given
+        AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto();
+        accountDepositReqDto.setNumber(1111L);
+        accountDepositReqDto.setAmount(0L);
+        accountDepositReqDto.setGubun("DEPOSIT");
+        accountDepositReqDto.setTel("01040163427");
+
+        //when
+        assertThrows(CustomApiException.class, () -> accountService.계좌입금(accountDepositReqDto));
+
+        //then
     }
 }
