@@ -82,10 +82,10 @@ public class AccountService {
 
         // 거래내역 남기기
         Transaction transaction = Transaction.builder()
+                .withdrawAccount(null)
                 .depositAccount(depositAccountPS)
-                .withdrawAccount(null)
+                .withdrawAccountBalance(null)
                 .depositAccountBalance(depositAccountPS.getBalance())
-                .withdrawAccount(null)
                 .amount(accountDepositReqDto.getAmount())
                 .gubun(TransactionEnum.DEPOSIT)
                 .sender("ATM")
@@ -95,5 +95,47 @@ public class AccountService {
         Transaction transactionPS = transactionRepository.save(transaction);
 
         return new AccountDepositRespDto(depositAccountPS, transactionPS);
+    }
+
+    @Transactional
+    public AccountWithdrawRespDto 계좌출금(AccountWithdrawReqDto accountWithdrawReqDto, Long userId){
+        // 0원인지 체크
+        if(accountWithdrawReqDto.getAmount() <= 0L){
+            throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
+        }
+
+        // 출금계좌 확인
+        Account withdrawAccountPS = accountRepository.findByNumber(accountWithdrawReqDto.getNumber()).orElseThrow(
+                () -> new CustomApiException("계좌를 찾을 수 없습니다.")
+        );
+
+        // 출금 소유자 확인
+        withdrawAccountPS.checkOwner(userId);
+
+        // 출금계좌 비밀번호 확인
+        withdrawAccountPS.checkSamePassword(accountWithdrawReqDto.getPassword());
+
+        // 출금계좌 잔액 확인
+        withdrawAccountPS.checkBalance(accountWithdrawReqDto.getAmount());
+
+        // 출금하기
+        withdrawAccountPS.withdraw(accountWithdrawReqDto.getAmount());
+
+        // 거래내역 남기기(내 계좌 -> ATM 으로 출금
+        Transaction transaction = Transaction.builder()
+                .withdrawAccount(withdrawAccountPS)
+                .depositAccount(null)
+                .withdrawAccountBalance(withdrawAccountPS.getBalance())
+                .depositAccountBalance(null)
+                .amount(accountWithdrawReqDto.getAmount())
+                .gubun(TransactionEnum.WITHDRAW)
+                .sender(withdrawAccountPS.getNumber()+"")
+                .receiver("ATM")
+                .tel(null)
+                .build();
+
+        Transaction transactionPS = transactionRepository.save(transaction);
+
+        return new AccountWithdrawRespDto(withdrawAccountPS,transactionPS);
     }
 }

@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum TransactionEnum {
-    WITHDRAW("출급"), DEPOSIT("입금"), TRANSFER("이체"), ALL("입출금내역");
+    WITHDRAW("출금"), DEPOSIT("입금"), TRANSFER("이체"), ALL("입출금내역");
 
     private String value;
 }
