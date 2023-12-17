@@ -116,7 +116,7 @@ class AccountControllerTest extends DummyObject {
 
         //then
         assertThrows(CustomApiException.class, () -> accountRepository.findByNumber(number).orElseThrow(
-                                                        () -> new CustomApiException("계좌를 찾을 수 없습니다.")));
+                () -> new CustomApiException("계좌를 찾을 수 없습니다.")));
     }
 
     @Test
@@ -135,6 +135,29 @@ class AccountControllerTest extends DummyObject {
         ResultActions resultActions = mvc.perform
                 (MockMvcRequestBuilders.post("/api/account/deposit").content(requestBody).contentType(MediaType.APPLICATION_JSON));
 
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void withdrawAccount_test() throws Exception {
+        //given
+        AccountWithdrawReqDto reqDto = new AccountWithdrawReqDto();
+        reqDto.setNumber(1111L);
+        reqDto.setPassword(3427L);
+        reqDto.setAmount(100L);
+        reqDto.setGubun("WITHDRAW");
+
+        String requestBody = om.writeValueAsString(reqDto);
+        System.out.println("responseBody = " + requestBody);
+
+        //when
+        ResultActions resultActions = mvc.perform
+                (MockMvcRequestBuilders.post("/api/s/account/withdraw").content(requestBody).contentType(MediaType.APPLICATION_JSON));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("responseBody = " + responseBody);
 
