@@ -157,4 +157,31 @@ class AccountServiceTest extends DummyObject {
 
         //then
     }
+
+    @Test
+    @DisplayName("Mock 을 이용하지 않고 순수한 로직 테스트")
+    public void 계좌출금_test() throws Exception {
+        //given
+        Long failAmount = 0L;
+        Long failUserId = 2L;
+        Long failPassword = 4016L;
+        Long withdrawAmount = 2000L;
+
+        User cristiano = newMockUser(1L, "cristiano", "ronaldo");
+        Account cristianoAccount = newMockAccount(1L, 1111L, 1000L, cristiano);
+
+        //when
+
+
+        //then
+        assertThrows(CustomApiException.class, () -> {
+            if (failAmount <= 0L) {
+                throw new CustomApiException("0원 이하의 금액을 출금할 수 없습니다.");
+            }
+        });
+        assertThrows(CustomApiException.class, () -> cristianoAccount.checkOwner(failUserId));
+        assertThrows(CustomApiException.class, () -> cristianoAccount.checkSamePassword(failPassword));
+        assertThrows(CustomApiException.class, () -> cristianoAccount.withdraw(withdrawAmount));
+
+    }
 }

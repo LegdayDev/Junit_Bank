@@ -115,10 +115,7 @@ public class AccountService {
         // 출금계좌 비밀번호 확인
         withdrawAccountPS.checkSamePassword(accountWithdrawReqDto.getPassword());
 
-        // 출금계좌 잔액 확인
-        withdrawAccountPS.checkBalance(accountWithdrawReqDto.getAmount());
-
-        // 출금하기
+        // 출금하기(동시에 출금금액과 잔액을 확인)
         withdrawAccountPS.withdraw(accountWithdrawReqDto.getAmount());
 
         // 거래내역 남기기(내 계좌 -> ATM 으로 출금

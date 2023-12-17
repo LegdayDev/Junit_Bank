@@ -66,18 +66,15 @@ public class Account {
     }
 
     public void checkSamePassword(Long password) {
-        if(this.password != password){
+        if(this.password.longValue() != password){
             throw new CustomApiException("계좌 비밀번호 검증에 실패했습니다.");
         }
     }
 
-    public void checkBalance(Long amount) {
+    public void withdraw(Long amount) {
         if(this.balance < amount){
             throw new CustomApiException("계좌 잔액이 부족합니다.");
         }
-    }
-
-    public void withdraw(Long amount) {
         balance-=amount;
     }
 }
