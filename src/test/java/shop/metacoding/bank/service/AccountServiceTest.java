@@ -184,4 +184,41 @@ class AccountServiceTest extends DummyObject {
         assertThrows(CustomApiException.class, () -> cristianoAccount.withdraw(withdrawAmount));
 
     }
+
+    @Test
+    @DisplayName("Mockito 가 아닌 로직 테스트")
+    public void 계좌이체_test() throws Exception {
+        //given
+        AccountTransferReqDto reqDto = new AccountTransferReqDto();
+        reqDto.setWithdrawNumber(1111L);
+        reqDto.setDepositNumber(2222L);
+        reqDto.setWithdrawPassword(3427L);
+        reqDto.setAmount(100L);
+        reqDto.setGubun("TRANSFER");
+
+        User cristiano = newMockUser(1L,"cristiano","ronaldo");
+        User messi = newMockUser(2L,"messi","lionel");
+        Account withdrawAccount = newMockAccount(1L,1111L,1000L,cristiano);
+        Account depositAccount = newMockAccount(2L,2222L,1000L,messi);
+
+        //when
+        // 출금계좌와 입금계좌가 동일한지 체크
+        if(reqDto.getWithdrawNumber().equals(reqDto.getDepositNumber())){
+            throw new CustomApiException("입금계좌와 출금계좌가 동일합니다");
+        }
+        // 이체금액이 0원인지 체크
+        if(reqDto.getAmount() <= 0L){
+            throw new CustomApiException("0원 이하의 금액을 이체할 수 없습니다.");
+        }
+        // 출금 소유자 확인
+        withdrawAccount.checkOwner(1L);
+        // 출금계좌 비밀번호 확인
+        withdrawAccount.checkSamePassword(reqDto.getWithdrawPassword());
+        // 이체하기
+        withdrawAccount.withdraw(reqDto.getAmount());
+        depositAccount.deposit(reqDto.getAmount());
+
+        //then
+        assertThat(withdrawAccount.getBalance()).isEqualTo(900L);
+    }
 }
