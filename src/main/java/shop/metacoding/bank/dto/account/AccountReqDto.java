@@ -10,7 +10,7 @@ import javax.validation.constraints.Pattern;
 
 public class AccountReqDto {
     @Data
-    public static class AccountSaveRespDto{
+    public static class AccountSaveRespDto {
         private Long id;
         private Long number;
         private Long balance;
@@ -23,9 +23,9 @@ public class AccountReqDto {
     }
 
     @Data
-    public static class AccountDepositReqDto{
+    public static class AccountDepositReqDto {
         @NotNull
-        @Digits(integer = 4,fraction = 4)
+        @Digits(integer = 4, fraction = 4)
         private Long number;
         @NotNull
         private Long amount;
@@ -38,17 +38,35 @@ public class AccountReqDto {
     }
 
     @Data
-    public static class AccountWithdrawReqDto{
+    public static class AccountWithdrawReqDto {
         @NotNull
-        @Digits(integer = 4,fraction = 4)
+        @Digits(integer = 4, fraction = 4)
         private Long number;
         @NotNull
-        @Digits(integer = 4,fraction = 4)
+        @Digits(integer = 4, fraction = 4)
         private Long password;
         @NotNull
         private Long amount;
         @NotEmpty
         @Pattern(regexp = "^(WITHDRAW)$")
+        private String gubun;
+    }
+
+    @Data
+    public static class AccountTransferReqDto {
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long withdrawNumber;
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long depositNumber;
+        @NotNull
+        @Digits(integer = 4, fraction = 4)
+        private Long withdrawPassword;
+        @NotNull
+        private Long amount;
+        @NotEmpty
+        @Pattern(regexp = "^(TRANSFER)$")
         private String gubun;
     }
 }
