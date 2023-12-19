@@ -49,7 +49,6 @@ public class AccountController {
                                             BindingResult bindingResult) {
         AccountDepositRespDto accountDepositRespDto = accountService.계좌입금(accountDepositReqDto);
         return new ResponseEntity<>(new ResponseDto<>(1, "계좌 입금 완료", accountDepositRespDto), HttpStatus.CREATED);
-
     }
 
     @PostMapping("/s/account/withdraw") // 입금이기 때문에 인증이 필요없다.
@@ -59,6 +58,14 @@ public class AccountController {
         AccountWithdrawRespDto accountWithdrawRespDto =
                 accountService.계좌출금(accountWithdrawReqDto, loginUser.getUser().getId());
         return new ResponseEntity<>(new ResponseDto<>(1, "계좌 출금 완료", accountWithdrawRespDto), HttpStatus.CREATED);
+    }
 
+    @PostMapping("/s/account/transfer") // 입금이기 때문에 인증이 필요없다.
+    public ResponseEntity<?> transferAccount(@RequestBody @Valid AccountTransferReqDto accountTransferReqDto,
+                                             BindingResult bindingResult,
+                                             @AuthenticationPrincipal LoginUser loginUser) {
+        AccountTransferRespDto accountTransferRespDto =
+                accountService.계좌이체(accountTransferReqDto, loginUser.getUser().getId());
+        return new ResponseEntity<>(new ResponseDto<>(1, "계좌 이체 완료", accountTransferRespDto), HttpStatus.CREATED);
     }
 }

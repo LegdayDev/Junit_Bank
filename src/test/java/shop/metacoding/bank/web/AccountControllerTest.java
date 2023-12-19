@@ -156,8 +156,32 @@ class AccountControllerTest extends DummyObject {
         System.out.println("responseBody = " + requestBody);
 
         //when
-        ResultActions resultActions = mvc.perform
-                (MockMvcRequestBuilders.post("/api/s/account/withdraw").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+        ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.
+                post("/api/s/account/withdraw").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void transferAccount_test() throws Exception {
+        //given
+        AccountTransferReqDto reqDto = new AccountTransferReqDto();
+        reqDto.setWithdrawNumber(1111L);
+        reqDto.setDepositNumber(2222L);
+        reqDto.setWithdrawPassword(3427L);
+        reqDto.setAmount(100L);
+        reqDto.setGubun("TRANSFER");
+
+        String requestBody = om.writeValueAsString(reqDto);
+        System.out.println("requestBody = " + requestBody);
+
+        //when
+        ResultActions resultActions = mvc.perform(MockMvcRequestBuilders.
+                post("/api/s/account/transfer").content(requestBody).contentType(MediaType.APPLICATION_JSON));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         System.out.println("responseBody = " + responseBody);
 
