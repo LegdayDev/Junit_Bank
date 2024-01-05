@@ -1,5 +1,6 @@
 package shop.metacoding.bank.domain.transaction;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,8 @@ import shop.metacoding.bank.domain.user.UserRepository;
 
 import javax.persistence.EntityManager;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
 public class TransactionRepositoryImplTest extends DummyObject {
@@ -32,6 +35,7 @@ public class TransactionRepositoryImplTest extends DummyObject {
     public void setUp(){
         autoIncrementReset();
         dataSetting();
+        em.clear(); // Repository 테스트에서는 필수 -> 쿼리문을 제대로 확인하기 위해
     }
 
     @Test
@@ -64,7 +68,9 @@ public class TransactionRepositoryImplTest extends DummyObject {
             System.out.println("t.getWithdrawAccountBalance() = " + t.getWithdrawAccountBalance());
             System.out.println("=============================");
         });
+
         //then
+        assertThat(transactionListPS.get(3).getDepositAccountBalance()).isEqualTo(800L);
     }
 
     private void dataSetting() {
