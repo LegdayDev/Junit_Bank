@@ -36,7 +36,6 @@ public class TransactionRepositoryImplTest extends DummyObject {
 
     @Test
     public void dataJpa_test() throws Exception {
-        //given
         List<Transaction> transactionList = transactionRepository.findAll();
 
         for (Transaction transaction : transactionList) {
@@ -46,8 +45,25 @@ public class TransactionRepositoryImplTest extends DummyObject {
             System.out.println("transaction.getGubun() = " + transaction.getGubun());
             System.out.println("======================");
         }
+    }
+
+    @Test
+    public void findTransactionList_all_test() throws Exception {
+        //given
+        Long accountId = 1L;
+
         //when
-        
+        List<Transaction> transactionListPS = transactionRepository.findTransactionList(accountId,"ALL",0);
+        transactionListPS.forEach((t)->{
+            System.out.println("t.getId() = " + t.getId());
+            System.out.println("t.getGubun() = " + t.getGubun());
+            System.out.println("t.getAmount() = " + t.getAmount());
+            System.out.println("t.getSender() = " + t.getSender());
+            System.out.println("t.getReceiver() = " + t.getReceiver());
+            System.out.println("t.getDepositAccountBalance() = " + t.getDepositAccountBalance());
+            System.out.println("t.getWithdrawAccountBalance() = " + t.getWithdrawAccountBalance());
+            System.out.println("=============================");
+        });
         //then
     }
 

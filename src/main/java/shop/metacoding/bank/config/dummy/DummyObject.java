@@ -39,7 +39,7 @@ public class DummyObject {
                 .build();
     }
 
-    protected Account newAccount(Long number, User user){
+    protected Account newAccount(Long number, User user) {
         return Account.builder()
                 .number(number)
                 .password(3427L)
@@ -48,7 +48,7 @@ public class DummyObject {
                 .build();
     }
 
-    protected Account newMockAccount(Long id, Long number, Long balance,  User user){
+    protected Account newMockAccount(Long id, Long number, Long balance, User user) {
         return Account.builder()
                 .id(id)
                 .number(number)
@@ -60,7 +60,7 @@ public class DummyObject {
                 .build();
     }
 
-    protected Transaction newMockDepositTransaction(Long id, Account account){
+    protected Transaction newMockDepositTransaction(Long id, Account account) {
         account.deposit(100L); // 계좌가 입금이 되고 거래내역이 만들어져야 하기 때문에 세팅이 필요
         return Transaction.builder()
                 .id(id)
@@ -79,10 +79,11 @@ public class DummyObject {
 
     }
 
-    protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository){
+    protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository) {
         account.deposit(100L);
-        // 서비스 로직에서 한게 아니라 더티체킹이 안된다.
-        if(accountRepository != null){
+        // Repository 테스트에서는 더티체킹이 됨
+        // Controller 테스트에서는 더티체킹이 안됨
+        if (accountRepository != null) {
             accountRepository.save(account);
         }
         return Transaction.builder()
@@ -93,15 +94,16 @@ public class DummyObject {
                 .amount(100L)
                 .gubun(TransactionEnum.DEPOSIT)
                 .sender("ATM")
-                .receiver(account.getNumber()+"")
+                .receiver(account.getNumber() + "")
                 .tel("01040163427")
                 .build();
     }
 
-    protected Transaction newWithdrawTransaction(Account account, AccountRepository accountRepository){
+    protected Transaction newWithdrawTransaction(Account account, AccountRepository accountRepository) {
         account.withdraw(100L);
-        // 서비스 로직에서 한게 아니라 더티체킹이 안된다.
-        if(accountRepository != null){
+        // Repository 테스트에서는 더티체킹이 됨
+        // Controller 테스트에서는 더티체킹이 안됨
+        if (accountRepository != null) {
             accountRepository.save(account);
         }
         return Transaction.builder()
@@ -111,16 +113,17 @@ public class DummyObject {
                 .depositAccountBalance(null)
                 .amount(100L)
                 .gubun(TransactionEnum.WITHDRAW)
-                .sender(account.getNumber()+"")
+                .sender(account.getNumber() + "")
                 .receiver("ATM")
                 .build();
     }
 
-    protected Transaction newTransferTransaction(Account withdrawAccount, Account depositAccount ,AccountRepository accountRepository){
+    protected Transaction newTransferTransaction(Account withdrawAccount, Account depositAccount, AccountRepository accountRepository) {
         withdrawAccount.withdraw(100L);
         depositAccount.deposit(100L);
-        // 서비스 로직에서 한게 아니라 더티체킹이 안된다.
-        if(accountRepository != null){
+        // Repository 테스트에서는 더티체킹이 됨
+        // Controller 테스트에서는 더티체킹이 안됨
+        if (accountRepository != null) {
             accountRepository.save(depositAccount);
             accountRepository.save(withdrawAccount);
         }
@@ -131,8 +134,8 @@ public class DummyObject {
                 .depositAccountBalance(depositAccount.getBalance())
                 .amount(100L)
                 .gubun(TransactionEnum.TRANSFER)
-                .sender(withdrawAccount.getNumber()+"")
-                .receiver(depositAccount.getNumber()+"")
+                .sender(withdrawAccount.getNumber() + "")
+                .receiver(depositAccount.getNumber() + "")
                 .build();
     }
 }

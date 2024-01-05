@@ -46,8 +46,8 @@ public class TransactionRepositoryImpl implements Dao{
         }else if(gubun.equals("DEPOSIT")){
             query = query.setParameter("depositAccountId", accountId);
         }else{
-            query = query.setParameter("withdrawAccount", accountId);
-            query = query.setParameter("depositAccount", accountId);
+            query = query.setParameter("withdrawAccountId", accountId);
+            query = query.setParameter("depositAccountId", accountId);
         }
 
         query.setFirstResult(page*5);
