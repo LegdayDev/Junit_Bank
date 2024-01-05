@@ -1,6 +1,7 @@
 package shop.metacoding.bank.domain.transaction;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import shop.metacoding.bank.config.dummy.DummyObject;
@@ -9,21 +10,45 @@ import shop.metacoding.bank.domain.account.AccountRepository;
 import shop.metacoding.bank.domain.user.User;
 import shop.metacoding.bank.domain.user.UserRepository;
 
+import javax.persistence.EntityManager;
+import java.util.List;
+
 @DataJpaTest
 public class TransactionRepositoryImplTest extends DummyObject {
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    AccountRepository accountRepository;
+    private AccountRepository accountRepository;
 
     @Autowired
-    TransactionRepository transactionRepository;
+    private TransactionRepository transactionRepository;
+
+    @Autowired
+    private EntityManager em;
 
     @BeforeEach
     public void setUp(){
+        autoIncrementReset();
         dataSetting();
+    }
+
+    @Test
+    public void dataJpa_test() throws Exception {
+        //given
+        List<Transaction> transactionList = transactionRepository.findAll();
+
+        for (Transaction transaction : transactionList) {
+            System.out.println("transaction.getId() = " + transaction.getId());
+            System.out.println("transaction.getSender() = " + transaction.getSender());
+            System.out.println("transaction.getReceiver() = " + transaction.getReceiver());
+            System.out.println("transaction.getGubun() = " + transaction.getGubun());
+            System.out.println("======================");
+        }
+        //when
+        
+        //then
     }
 
     private void dataSetting() {
@@ -47,5 +72,11 @@ public class TransactionRepositoryImplTest extends DummyObject {
                 .save(newTransferTransaction(ssarAccount1, loveAccount, accountRepository));
         Transaction transferTransaction3 = transactionRepository
                 .save(newTransferTransaction(cosAccount, ssarAccount1, accountRepository));
+    }
+
+    private void autoIncrementReset() {
+        em.createNativeQuery("ALTER TABLE user_tb ALTER COLUMN id RESTART WITH 1").executeUpdate();
+        em.createNativeQuery("ALTER TABLE account_tb ALTER COLUMN id RESTART WITH 1").executeUpdate();
+        em.createNativeQuery("ALTER TABLE transaction_tb ALTER COLUMN id RESTART WITH 1").executeUpdate();
     }
 }
