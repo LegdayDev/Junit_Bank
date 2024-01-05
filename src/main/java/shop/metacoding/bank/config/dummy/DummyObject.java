@@ -2,6 +2,7 @@ package shop.metacoding.bank.config.dummy;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import shop.metacoding.bank.domain.account.Account;
+import shop.metacoding.bank.domain.account.AccountRepository;
 import shop.metacoding.bank.domain.transaction.Transaction;
 import shop.metacoding.bank.domain.transaction.TransactionEnum;
 import shop.metacoding.bank.domain.user.User;
@@ -76,5 +77,62 @@ public class DummyObject {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
+    }
+
+    protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository){
+        account.deposit(100L);
+        // 서비스 로직에서 한게 아니라 더티체킹이 안된다.
+        if(accountRepository != null){
+            accountRepository.save(account);
+        }
+        return Transaction.builder()
+                .withdrawAccount(null)
+                .depositAccount(account)
+                .withdrawAccountBalance(null)
+                .depositAccountBalance(account.getBalance())
+                .amount(100L)
+                .gubun(TransactionEnum.DEPOSIT)
+                .sender("ATM")
+                .receiver(account.getNumber()+"")
+                .tel("01040163427")
+                .build();
+    }
+
+    protected Transaction newWithdrawTransaction(Account account, AccountRepository accountRepository){
+        account.withdraw(100L);
+        // 서비스 로직에서 한게 아니라 더티체킹이 안된다.
+        if(accountRepository != null){
+            accountRepository.save(account);
+        }
+        return Transaction.builder()
+                .withdrawAccount(account)
+                .depositAccount(null)
+                .withdrawAccountBalance(account.getBalance())
+                .depositAccountBalance(null)
+                .amount(100L)
+                .gubun(TransactionEnum.WITHDRAW)
+                .sender(account.getNumber()+"")
+                .receiver("ATM")
+                .build();
+    }
+
+    protected Transaction newTransferTransaction(Account withdrawAccount, Account depositAccount ,AccountRepository accountRepository){
+        withdrawAccount.withdraw(100L);
+        depositAccount.deposit(100L);
+        // 서비스 로직에서 한게 아니라 더티체킹이 안된다.
+        if(accountRepository != null){
+            accountRepository.save(depositAccount);
+            accountRepository.save(withdrawAccount);
+        }
+        return Transaction.builder()
+                .withdrawAccount(withdrawAccount)
+                .depositAccount(depositAccount)
+                .withdrawAccountBalance(withdrawAccount.getBalance())
+                .depositAccountBalance(depositAccount.getBalance())
+                .amount(100L)
+                .gubun(TransactionEnum.TRANSFER)
+                .sender(withdrawAccount.getNumber()+"")
+                .receiver(depositAccount.getNumber()+"")
+                .build();
     }
 }
