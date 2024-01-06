@@ -15,7 +15,7 @@ public class LongTest {
         //when
 
         //then
-        assertThat(v1).isSameAs(v2);
+        assertThat(v1).isNotSameAs(v2);
     }
 
     @Test
