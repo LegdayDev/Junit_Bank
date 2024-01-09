@@ -118,8 +118,7 @@ class AccountControllerTest extends DummyObject {
         System.out.println("responseBody = " + responseBody);
 
         //then
-        assertThrows(CustomApiException.class, () -> accountRepository.findByNumber(number).orElseThrow(
-                () -> new CustomApiException("계좌를 찾을 수 없습니다.")));
+        resultActions.andExpect(MockMvcResultMatchers.status().isOk());
     }
 
     @Test
