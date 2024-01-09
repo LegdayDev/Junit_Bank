@@ -27,14 +27,14 @@ public class AccountService {
     private final TransactionRepository transactionRepository;
 
     @Transactional
-    public AccountSaveRespDto 계좌등록(AccountSaveReqDto dto, Long userId){
+    public AccountSaveRespDto 계좌등록(AccountSaveReqDto dto, Long userId) {
         // User 검증
         User userPS = userRepository.findById(userId).orElseThrow(
                 () -> new CustomApiException("유저를 찾을 수  없습니다.")
         );
         // 중복계좌 검증
         Optional<Account> accountOP = accountRepository.findByNumber(dto.getNumber());
-        if(accountOP.isPresent()){
+        if (accountOP.isPresent()) {
             throw new CustomApiException("계좌 중복!");
         }
         // 계좌 등록
@@ -43,18 +43,18 @@ public class AccountService {
         return new AccountSaveRespDto(accountPS);
     }
 
-    public AccountListRespDto 계좌목록보기_유저별(Long userId){
+    public AccountListRespDto 계좌목록보기_유저별(Long userId) {
         User userPS = userRepository.findById(userId).orElseThrow(
                 () -> new CustomApiException("유저를 찾을 수 없습니다.")
         );
 
         List<Account> accountListPS = accountRepository.findByUser_id(userId);
 
-        return new AccountListRespDto(userPS,accountListPS);
+        return new AccountListRespDto(userPS, accountListPS);
     }
 
     @Transactional
-    public void 계좌삭제(Long accountNumber, Long userId){
+    public void 계좌삭제(Long accountNumber, Long userId) {
         // 1. 계좌확인
         Account accountPS = accountRepository.findByNumber(accountNumber).orElseThrow(
                 () -> new CustomApiException("계좌를 찾을 수 없습니다.")
@@ -66,9 +66,9 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountDepositRespDto 계좌입금(AccountDepositReqDto accountDepositReqDto){
+    public AccountDepositRespDto 계좌입금(AccountDepositReqDto accountDepositReqDto) {
         // 0원인지 체크
-        if(accountDepositReqDto.getAmount() <= 0L){
+        if (accountDepositReqDto.getAmount() <= 0L) {
             throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
         }
 
@@ -98,9 +98,9 @@ public class AccountService {
     }
 
     @Transactional
-    public AccountWithdrawRespDto 계좌출금(AccountWithdrawReqDto accountWithdrawReqDto, Long userId){
+    public AccountWithdrawRespDto 계좌출금(AccountWithdrawReqDto accountWithdrawReqDto, Long userId) {
         // 0원인지 체크
-        if(accountWithdrawReqDto.getAmount() <= 0L){
+        if (accountWithdrawReqDto.getAmount() <= 0L) {
             throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
         }
 
@@ -126,25 +126,25 @@ public class AccountService {
                 .depositAccountBalance(null)
                 .amount(accountWithdrawReqDto.getAmount())
                 .gubun(TransactionEnum.WITHDRAW)
-                .sender(withdrawAccountPS.getNumber()+"")
+                .sender(withdrawAccountPS.getNumber() + "")
                 .receiver("ATM")
                 .tel(null)
                 .build();
 
         Transaction transactionPS = transactionRepository.save(transaction);
 
-        return new AccountWithdrawRespDto(withdrawAccountPS,transactionPS);
+        return new AccountWithdrawRespDto(withdrawAccountPS, transactionPS);
     }
 
     @Transactional
-    public AccountTransferRespDto 계좌이체(AccountTransferReqDto accountTransferReqDto, Long userId){
+    public AccountTransferRespDto 계좌이체(AccountTransferReqDto accountTransferReqDto, Long userId) {
         // 출금계좌와 입금계좌가 동일하면 안됨
-        if(accountTransferReqDto.getWithdrawNumber().equals(accountTransferReqDto.getDepositNumber())){
+        if (accountTransferReqDto.getWithdrawNumber().equals(accountTransferReqDto.getDepositNumber())) {
             throw new CustomApiException("입금계좌와 출금계좌가 동일합니다.");
         }
 
         // 0원인지 체크
-        if(accountTransferReqDto.getAmount() <= 0L){
+        if (accountTransferReqDto.getAmount() <= 0L) {
             throw new CustomApiException("0원 이하의 금액을 입금할 수 없습니다.");
         }
 
@@ -176,12 +176,28 @@ public class AccountService {
                 .depositAccountBalance(depositAccountPS.getBalance())
                 .amount(accountTransferReqDto.getAmount())
                 .gubun(TransactionEnum.TRANSFER)
-                .sender(accountTransferReqDto.getWithdrawNumber()+"")
-                .receiver(accountTransferReqDto.getDepositNumber()+"")
+                .sender(accountTransferReqDto.getWithdrawNumber() + "")
+                .receiver(accountTransferReqDto.getDepositNumber() + "")
                 .build();
 
         Transaction transactionPS = transactionRepository.save(transaction);
 
-        return new AccountTransferRespDto(withdrawAccountPS,transactionPS);
+        return new AccountTransferRespDto(withdrawAccountPS, transactionPS);
+    }
+
+    public AccountDetailRespDto 계좌상세보기(Long number, Long userId, Integer page) {
+        // 1. 구분값, 페이지고정
+        String gubun = "ALL";
+
+        Account accountPS = accountRepository.findByNumber(number).orElseThrow(
+                () -> new CustomApiException("계좌를 찾을 수 없습니다.")
+        );
+
+        accountPS.checkOwner(userId);
+
+        // 입출금 목록보기
+        List<Transaction> transactionListPS = transactionRepository.findTransactionList(accountPS.getId(), gubun, page);
+
+        return new AccountDetailRespDto(accountPS, transactionListPS);
     }
 }

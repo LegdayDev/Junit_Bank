@@ -16,7 +16,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import shop.metacoding.bank.config.dummy.DummyObject;
+import shop.metacoding.bank.domain.account.Account;
 import shop.metacoding.bank.domain.account.AccountRepository;
+import shop.metacoding.bank.domain.transaction.Transaction;
+import shop.metacoding.bank.domain.transaction.TransactionRepository;
 import shop.metacoding.bank.domain.user.User;
 import shop.metacoding.bank.domain.user.UserRepository;
 import shop.metacoding.bank.dto.account.AccountReqDto;
@@ -46,6 +49,9 @@ class AccountControllerTest extends DummyObject {
     private AccountRepository accountRepository;
 
     @Autowired
+    private TransactionRepository transactionRepository;
+
+    @Autowired
     private EntityManager em;
 
     @Autowired
@@ -53,14 +59,11 @@ class AccountControllerTest extends DummyObject {
 
     @BeforeEach
     public void setUp() {
-        User cristiano = userRepository.save(newUser("cristiano", "ronaldo"));
-        User messi = userRepository.save(newUser("messi", "lionel"));
-        accountRepository.save(newAccount(1111L, cristiano));
-        accountRepository.save(newAccount(2222L, messi));
+        dataSetting();
         em.clear();
     }
 
-    @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
     public void saveAccount_test() throws Exception {
         //given
@@ -82,7 +85,7 @@ class AccountControllerTest extends DummyObject {
     }
 
     // TODO Junit 중급강의 종료 후 코드 비교하기
-    @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
     public void findUserAccount_test() throws Exception {
         //given
@@ -103,7 +106,7 @@ class AccountControllerTest extends DummyObject {
      *
      * @throws Exception
      */
-    @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
     public void deleteAccount_test() throws Exception {
         //given
@@ -142,7 +145,7 @@ class AccountControllerTest extends DummyObject {
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
-    @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
     public void withdrawAccount_test() throws Exception {
         //given
@@ -165,7 +168,7 @@ class AccountControllerTest extends DummyObject {
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
     }
 
-    @WithUserDetails(value = "cristiano", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     @Test
     public void transferAccount_test() throws Exception {
         //given
@@ -187,5 +190,49 @@ class AccountControllerTest extends DummyObject {
 
         //then
         resultActions.andExpect(MockMvcResultMatchers.status().isCreated());
+    }
+
+    @WithUserDetails(value = "ssar", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+    @Test
+    public void findDetailAccount_test() throws Exception {
+        //given
+        Long number = 1111L;
+        String page = "0"; // 실제 컨트롤러에서 쿼리파라미터로 들어오는 값들은 전부 String 이기 때문.
+
+        //when
+        ResultActions resultActions =
+                mvc.perform(MockMvcRequestBuilders.get("/api/s/account/" + number)
+                        .param("page", page));
+        String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+        System.out.println("responseBody = " + responseBody);
+
+        //then
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.data.transactions[0].balance").value(900L));
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.data.transactions[1].balance").value(800L));
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.data.transactions[2].balance").value(700L));
+        resultActions.andExpect(MockMvcResultMatchers.jsonPath("$.data.transactions[3].balance").value(800L));
+    }
+
+    private void dataSetting() {
+        User ssar = userRepository.save(newUser("ssar", "쌀"));
+        User cos = userRepository.save(newUser("cos", "코스,"));
+        User love = userRepository.save(newUser("love", "러브"));
+        User admin = userRepository.save(newUser("admin", "관리자"));
+
+        Account ssarAccount1 = accountRepository.save(newAccount(1111L, ssar));
+        Account cosAccount = accountRepository.save(newAccount(2222L, cos));
+        Account loveAccount = accountRepository.save(newAccount(3333L, love));
+        Account ssarAccount2 = accountRepository.save(newAccount(4444L, ssar));
+
+        Transaction withdrawTransaction1 = transactionRepository
+                .save(newWithdrawTransaction(ssarAccount1, accountRepository));
+        Transaction depositTransaction1 = transactionRepository
+                .save(newDepositTransaction(cosAccount, accountRepository));
+        Transaction transferTransaction1 = transactionRepository
+                .save(newTransferTransaction(ssarAccount1, cosAccount, accountRepository));
+        Transaction transferTransaction2 = transactionRepository
+                .save(newTransferTransaction(ssarAccount1, loveAccount, accountRepository));
+        Transaction transferTransaction3 = transactionRepository
+                .save(newTransferTransaction(cosAccount, ssarAccount1, accountRepository));
     }
 }

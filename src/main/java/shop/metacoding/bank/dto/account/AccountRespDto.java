@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 public class AccountRespDto {
     @Data
-    public static class AccountSaveReqDto{
+    public static class AccountSaveReqDto {
         @NotNull
         @Digits(integer = 4, fraction = 4) // @Size 는 String 만
         private Long number;
@@ -23,7 +23,7 @@ public class AccountRespDto {
         @Digits(integer = 4, fraction = 4)
         private Long password;
 
-        public Account toEntity(User user){
+        public Account toEntity(User user) {
             return Account.builder().
                     number(number).
                     password(password).
@@ -33,7 +33,7 @@ public class AccountRespDto {
     }
 
     @Data
-    public static class AccountListRespDto{
+    public static class AccountListRespDto {
         private String fullName;
         private List<AccountDto> accounts = new ArrayList<>();
 
@@ -51,7 +51,7 @@ public class AccountRespDto {
             private Long balance;
 
             public AccountDto(Account account) {
-                this.id=account.getId();
+                this.id = account.getId();
                 this.number = account.getNumber();
                 this.balance = account.getBalance();
             }
@@ -59,7 +59,7 @@ public class AccountRespDto {
     }
 
     @Data
-    public static class AccountDepositRespDto{
+    public static class AccountDepositRespDto {
         private Long id; // 계좌 ID
         private Long number; // 계좌번호
         private TransactionDto transaction;
@@ -71,7 +71,7 @@ public class AccountRespDto {
         }
 
         @Data
-        public static class TransactionDto{
+        public static class TransactionDto {
             private Long id;
             private String gubun;
             private String sender;
@@ -96,7 +96,7 @@ public class AccountRespDto {
     }
 
     @Data
-    public static class AccountWithdrawRespDto{
+    public static class AccountWithdrawRespDto {
         private Long id; // 계좌 ID
         private Long number; // 계좌번호
         private Long balance; // 잔액
@@ -110,7 +110,7 @@ public class AccountRespDto {
         }
 
         @Data
-        public static class TransactionDto{
+        public static class TransactionDto {
             private Long id;
             private String gubun;
             private String sender;
@@ -130,7 +130,7 @@ public class AccountRespDto {
     }
 
     @Data
-    public static class AccountTransferRespDto{
+    public static class AccountTransferRespDto {
         private Long id; // 계좌 ID
         private Long number; // 계좌번호
         private Long balance; // 잔액
@@ -144,7 +144,7 @@ public class AccountRespDto {
         }
 
         @Data
-        public static class TransactionDto{
+        public static class TransactionDto {
             private Long id;
             private String gubun;
             private String sender;
@@ -162,6 +162,59 @@ public class AccountRespDto {
                 this.amount = transaction.getAmount();
                 this.depositAccountBalance = transaction.getDepositAccountBalance();
                 this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+            }
+        }
+    }
+
+    @Data
+    public static class AccountDetailRespDto {
+        private Long id;
+        private Long number;
+        private Long balance;
+        private List<TransactionDto> transactions = new ArrayList<>();
+
+        public AccountDetailRespDto(Account account, List<Transaction> transactions) {
+            this.id = account.getId();
+            this.number = account.getNumber();
+            this.balance = account.getBalance();
+            this.transactions = transactions.stream()
+                    .map((t) -> new TransactionDto(t, account.getNumber()))
+                    .collect(Collectors.toList());
+        }
+
+        @Data
+        public static class TransactionDto {
+            private Long id;
+            private String gubun;
+            private Long amount;
+
+            private String sender;
+            private String receiver;
+
+            private String tel;
+            private String createdAt;
+            private Long balance;
+
+            public TransactionDto(Transaction transaction, Long accountNumber) {
+                this.id = transaction.getId();
+                this.gubun = transaction.getGubun().getValue();
+                this.amount = transaction.getAmount();
+                this.sender = transaction.getSender();
+                this.receiver = transaction.getReceiver();
+                this.createdAt = CustomDateUtil.toStringFormat(transaction.getCreatedAt());
+                this.tel = transaction.getTel() == null ? "없음" : transaction.getTel();
+
+                if (transaction.getDepositAccount() == null) {
+                    this.balance = transaction.getWithdrawAccountBalance();
+                } else if (transaction.getWithdrawAccount() == null) {
+                    this.balance = transaction.getDepositAccountBalance();
+                } else {
+                    if (accountNumber.longValue() == transaction.getDepositAccount().getNumber().longValue()) {
+                        this.balance = transaction.getDepositAccountBalance();
+                    } else {
+                        this.balance = transaction.getWithdrawAccountBalance();
+                    }
+                }
             }
         }
     }
